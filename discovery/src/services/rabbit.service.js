@@ -22,6 +22,13 @@ module.exports = class RabbitService {
     )
   }
 
+  async send(metadata) {
+    if (!this.channel) {
+      throw new Error('Rabbit is not connected, call to method connect()');
+    }
+    this.channel.sendToQueue(this.queue, Buffer.from(JSON.stringify(metadata)));
+  }
+
   async connect(queue, durable = false) {
     this.queue = queue;
     this.durable = durable;
