@@ -17,34 +17,36 @@ module.exports = class ExpressService {
   }
 
   async callToExpressMethod(method, message) {
+    const uuid = message.payload.uuid;
     return new Promise((resolve, reject) => {
-        try {
-            let code = 200;
-            let type = 'application/json';
-            method.handle({
-                ...message.payload.request
+      try {
+        let code = 200;
+        let type = 'application/json';
+        method.handle({
+          ...message.payload.request
+        },
+          {
+            sendStatus: statusCode => {
+              code = statusCode;
+              return { send: (data) => this.send(uuid, data, code, type, resolve) };
             },
-                {
-                    sendStatus: statusCode => {
-                        code = statusCode;
-                        return { send: (data) => this.send(data, code, type, resolve) };
-                    },
-                    type: statusType => { type = statusType },
-                    send: data => this.send(data, code, type, resolve),
-                },
-                (e) => e);
-        } catch (err) {
-            reject(err);
-        }
+            type: statusType => { type = statusType },
+            send: data => this.send(uuid, data, code, type, resolve),
+          },
+          (e) => e);
+      } catch (err) {
+        reject(err);
+      }
     });
-}
+  }
 
-send(data, code, type, resolve) {
+  send(uuid, data, code, type, resolve) {
     resolve({
-        type: type,
-        code: code,
-        data: data
+      uuid: uuid,
+      type: type,
+      code: code,
+      data: data
     })
-}
+  }
 
 }

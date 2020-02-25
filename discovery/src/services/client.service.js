@@ -1,5 +1,6 @@
 const ExpressService = require('./express.service');
 const RequestService = require('./request.service');
+const HealthCheckService = require('./health-check');
 
 module.exports = class ClientService {
 
@@ -25,6 +26,11 @@ module.exports = class ClientService {
                 );
             }
         });
+    }
+
+    async healthCheck() {
+        const healthCheck = new HealthCheckService(this.metadataService);
+        healthCheck.clientHealthCheck();
     }
 
 }

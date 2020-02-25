@@ -9,7 +9,7 @@ module.exports = class RabbitService {
     this.queue = '';
   }
 
-  async consume(onMessage, _, noAck = true) {
+  async consume(onMessage, onError, noAck = true) {
     if (!this.channel) {
       throw new Error('Rabbit is not connected, call to method connect()');
     }
@@ -17,7 +17,8 @@ module.exports = class RabbitService {
     this.channel.consume(
       this.queue,
       message => onMessage(this.doDeserialize(message)),
-      { noAck: noAck }
+      { noAck: noAck },
+      rabbitErr => onError(rabbitErr)
     )
   }
 

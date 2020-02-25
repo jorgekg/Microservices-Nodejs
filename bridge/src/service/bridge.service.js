@@ -1,9 +1,10 @@
+const MetadataService = require('./metadata');
+
 module.exports = class BridgeService {
 
-    initializer(server) {
-        server.use((_, res) => {
-            return res.send('teste');
-        });
+    async initializer(server) {
+        const metadataService = new MetadataService();
+        await metadataService.createEndpointsByMetadata(server);
         console.log('Bridge has started!');
     }
 

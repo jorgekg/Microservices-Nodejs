@@ -4,7 +4,7 @@ module.exports = class BridgeService {
 
     async sendToBrigde(metadata) {
         const rabbit = await (new RabbitService())
-            .connect(`discovery.bridge`, false);
+            .connect(`bridge.metadata.result`, false);
         rabbit.send(metadata).then();
     }
 

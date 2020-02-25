@@ -1,3 +1,5 @@
+const Uuid = require('uuid');
+
 const RabbitService = require('./rabbit.service');
 const Metadata = require('./../models/metadata.model');
 const ExpressService = require('./express.service');
@@ -8,6 +10,7 @@ module.exports = class MetadataService {
   constructor() {
     this.metadata = []
     this.bridge = new BridgeService();
+    this.uuid = Uuid.v4();
   }
 
   async map() {
@@ -15,31 +18,45 @@ module.exports = class MetadataService {
       .connect(`discovery.metadata`, false);
     rabbit
       .consume(
-        message => {
-          const metadata = new Metadata(message.payload);
-          if (metadata.service) {
-            this.metadata.push(metadata);
-            console.log(`Register service ${metadata.service}`);
-          }
-          if (metadata.service === 'bridge') {
-            this.bridge.sendToBrigde(this.metadata);
-          }
-        },
-        err => console.log(err),
+        message => this.doMap(message),
+        () => {},
         true
       );
+  }
+
+  doMap(message) {
+    const metadata = new Metadata(message.payload);
+    if (metadata.service) {
+      this.metadata.push(metadata);
+      console.log(`Register service ${metadata.service}`);
+    }
+    this.bridge.sendToBrigde(this.metadata);
   }
 
   async send(name, service) {
     const rabbit = await (new RabbitService())
       .connect('discovery.metadata', false);
     const metadata = new Metadata({
+      uuid: this.uuid,
       service: name,
       address: '',
       queue: `discovery.${name}`,
       endpoints: (new ExpressService()).getEndpoints(service)
     });
     rabbit.send(metadata);
+  }
+
+  updateHealthCheck(uuid) {
+    this.metadata.forEach(metadata => {
+      if (metadata.uuid === uuid) {
+        metadata.healthCheck = 0;
+      }
+    });
+  }
+
+  remove(uuid) {
+    this.metadata = this.metadata.filter(metadata => metadata.uuid !== uuid);
+    this.bridge.sendToBrigde(this.metadata);
   }
 
   getMetadata() {
