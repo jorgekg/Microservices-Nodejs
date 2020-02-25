@@ -52,7 +52,6 @@ module.exports = class RabbitService {
       };
     } catch (err) {
       console.log(err);
-      return message.content.toString();
     }
   }
 

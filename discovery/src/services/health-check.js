@@ -1,10 +1,12 @@
 const RabbitService = require('./rabbit.service');
+const RabbitCacheService = require('./rabbit-cache.service');
 const Metadata = require('./../models/metadata.model');
 
 module.exports = class HealthCheckService {
 
   constructor(metadataService) {
     this.metadataService = metadataService;
+    this.rabbitCache = new RabbitCacheService();
   }
 
   async consumer() {
@@ -23,8 +25,7 @@ module.exports = class HealthCheckService {
   }
 
   async doConnect() {
-    return await (new RabbitService)
-      .connect('discovery.health-check');
+    return await this.rabbitCache.getQueue('discovery.health-check');
   }
 
   doConsumer(services) {

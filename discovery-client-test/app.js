@@ -23,4 +23,4 @@ server.get('/xpto4', (_, res) => {
     res.send('get');
 });
 (new Discovery()).client('client-test', server);
-server.listen(8763);
+server.listen(0);
