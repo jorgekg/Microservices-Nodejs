@@ -1,6 +1,7 @@
 const express = require('express');
 const Discovery = require('./../discovery/discovery')
 
+process.env.BRIDGE = true;
 process.env.RABBIT_USER = 'guest';
 process.env.RABBIT_PASS = 'guest';
 process.env.RABBIT_HOST = 'localhost';

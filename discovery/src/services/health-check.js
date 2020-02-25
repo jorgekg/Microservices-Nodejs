@@ -9,13 +9,13 @@ module.exports = class HealthCheckService {
 
   async consumer() {
     this.serverHealthCheck();
-    const rabbit = this.doConnect();
+    const rabbit = await this.doConnect();
     rabbit
       .consume(message => this.doConsumer(message.payload), err => console.log(err));
   }
 
   async send() {
-    const rabbit = this.doConnect();
+    const rabbit = await this.doConnect();
     rabbit
       .send({
         ...new Metadata({ uuid: this.metadataService.uuid })

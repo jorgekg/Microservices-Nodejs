@@ -13,11 +13,18 @@ module.exports = class ExpressService {
     serviceRegistered.forEach(endpoints => {
       endpoints.endpoints.forEach(endpoint => {
         switch (endpoint.method) {
-          case 'get':
-            this.doGet(endpoints.queue, endpoint.endpoint, server);
+          case 'post':
+            this.doPost(endpoints.queue, endpoints.service, endpoint.endpoint, server);
             break;
-
+          case 'put':
+            this.doPut(endpoints.queue, endpoints.service, endpoint.endpoint, server);
+            break;
+          case 'delete':
+            this.doDelete(endpoints.queue, endpoints.service, endpoint.endpoint, server);
+            break;
+          case 'get':
           default:
+            this.doGet(endpoints.queue, endpoints.service, endpoint.endpoint, server);
             break;
         }
       })
@@ -25,15 +32,48 @@ module.exports = class ExpressService {
     this.removeOldsEndpoints(server);
   }
 
-  doGet(queue, endpoint, server) {
-    server.get(endpoint, async (req, res) => {
+  doGet(queue, service, endpoint, server) {
+    server.get(`/${service}${endpoint}`, async (req, res) => {
       try {
         const result = await this.doRabbitSend(queue, endpoint, 'get', req);
         res.send(result.data);
       } catch (err) {
         res.status(err.code).send(err.data);
       }
-    })
+    });
+  }
+
+  doPost(queue, service, endpoint, server) {
+    server.post(`/${service}${endpoint}`, async (req, res) => {
+      try {
+        const result = await this.doRabbitSend(queue, endpoint, 'post', req);
+        res.send(result.data);
+      } catch (err) {
+        res.status(err.code).send(err.data);
+      }
+    });
+  }
+
+  doPut(queue, service, endpoint, server) {
+    server.put(`/${service}${endpoint}`, async (req, res) => {
+      try {
+        const result = await this.doRabbitSend(queue, endpoint, 'put', req);
+        res.send(result.data);
+      } catch (err) {
+        res.status(err.code).send(err.data);
+      }
+    });
+  }
+
+  doDelete(queue, service, endpoint, server) {
+    server.delete(`/${service}${endpoint}`, async (req, res) => {
+      try {
+        const result = await this.doRabbitSend(queue, endpoint, 'delete', req);
+        res.send(result.data);
+      } catch (err) {
+        res.status(err.code).send(err.data);
+      }
+    });
   }
 
   markRemoveOldsEndpoints(server) {
