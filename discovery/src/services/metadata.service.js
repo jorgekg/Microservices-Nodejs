@@ -46,10 +46,11 @@ module.exports = class MetadataService {
     rabbit.send(metadata);
   }
 
-  updateHealthCheck(uuid) {
+  updateHealthCheck(uuid, memoryUsage) {
     this.metadata.forEach(metadata => {
       if (metadata.uuid === uuid) {
         metadata.healthCheck = 0;
+        metadata.memoryUsage = memoryUsage;
       }
     });
   }

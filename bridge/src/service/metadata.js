@@ -6,7 +6,7 @@ module.exports = class MetadataService {
   async createEndpointsByMetadata(server) {
     const express = new ExpressService();
     const rabbitMetadataResult = await (new RabbitService())
-      .connect('bridge.metadata.result', false)
+      .connect('bridge.metadata', false)
     rabbitMetadataResult
       .consume(
         message => express.createEndpoints(message.payload, server),

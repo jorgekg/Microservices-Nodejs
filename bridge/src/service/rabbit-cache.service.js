@@ -22,7 +22,7 @@ module.exports = class RabbitCacheService {
       rabbitQueue.consume(message => this.doMessage(message), err => console.log(err));
     }
     return new Promise((resolve, reject) => {
-      let maxPull = 350;
+      let maxPull = process.env.MAX_PULL || 350;
       const interval = setInterval(() => {
         if (this.result[uuid]) {
           resolve(this.result[uuid]);
@@ -32,7 +32,7 @@ module.exports = class RabbitCacheService {
         if (maxPull <= 0) {
           reject({
             code: 504,
-            data: 'timeout'
+            data: 'Application timeout!'
           });
           clearInterval(interval);
         }

@@ -34,7 +34,7 @@ module.exports = class RabbitService {
     console.log(`Creating queue ${queue} ...`);
     await new Promise((resolve, reject) =>
       amqp.connect(
-        `amqp://${process.env.RABBIT_HOST || 'localhost'}`,
+        `amqp://${process.env.RABBIT_USER || 'guest'}:${process.env.RABBIT_PASS || 'guest'}@${process.env.RABBIT_HOST || 'localhost'}`,
         (rabbitErr, connection) => this.doConnect(rabbitErr, connection, resolve, reject)
       )
     )

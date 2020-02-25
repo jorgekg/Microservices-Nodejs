@@ -1,4 +1,5 @@
 const RabbitService = require('./rabbit.service');
+const Metadata = require('./../models/metadata.model');
 
 module.exports = class HealthCheckService {
 
@@ -8,23 +9,26 @@ module.exports = class HealthCheckService {
 
   async consumer() {
     this.serverHealthCheck();
-    const rabbit = await (new RabbitService)
-      .connect('discovery.health-check');
+    const rabbit = this.doConnect();
     rabbit
       .consume(message => this.doConsumer(message.payload), err => console.log(err));
   }
 
   async send() {
-    const rabbit = await (new RabbitService)
-      .connect('discovery.health-check');
+    const rabbit = this.doConnect();
     rabbit
       .send({
-        uuid: this.metadataService.uuid
+        ...new Metadata({ uuid: this.metadataService.uuid })
       });
   }
 
+  async doConnect() {
+    return await (new RabbitService)
+      .connect('discovery.health-check');
+  }
+
   doConsumer(services) {
-    this.metadataService.updateHealthCheck(services.uuid);
+    this.metadataService.updateHealthCheck(services.uuid, services.memoryUsage);
   }
 
   serverHealthCheck() {
@@ -40,14 +44,14 @@ module.exports = class HealthCheckService {
             this.metadataService.remove(metadata.uuid);
           }
         });
-    }, 30000)
+    }, process.env.HEALTH_CHECK || 30000)
   }
 
   clientHealthCheck() {
     setInterval(() => {
       console.log('Send health check...');
       this.send()
-          .catch(err => console.log('Not send health check: ', err));
-  }, 30000);
+        .catch(err => console.log('Not send health check: ', err));
+    }, process.env.HEALTH_CHECK || 30000);
   }
 }
