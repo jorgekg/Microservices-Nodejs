@@ -16,11 +16,8 @@ server.post('/xpto2', (_, res) => {
 server.put('/xpto3', (_, res) => {
     res.send('put');
 });
-server.delete('/xpto4', (_, res) => {
-    res.send('delete');
-});
 server.get('/xpto4', (_, res) => {
-    res.send('get');
+    res.send('cbina');
 });
 (new Discovery()).client('client-test', server);
 server.listen(0);
